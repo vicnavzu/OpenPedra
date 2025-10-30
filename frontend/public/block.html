@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{{block}} - Viewer</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.104/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <link href="/styles/block.css" rel="stylesheet">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+  <div id="navigation-help-button-container" style="position:absolute; top:5px; right: 40px; z-index: 1000;"></div>
+  <div id="cesium-container"></div>
+  <div id="left-panel"></div>
+  <script>
+    window.viewerConfig = {
+        school: '{{school}}',
+        sector: '{{sector}}', 
+        block: '{{block}}'
+    };
+  </script>
+  <script type="module" src="/scripts/block.js"></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+name: CI Security Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Validate Docker Compose
+      run: |
+        if [ ! -f "docker-compose.yml" ]; then
+          echo "docker-compose.yml not found"
+          exit 1
+        fi
+        
+        echo "Validating docker-compose syntax..."
+        docker-compose config -q
+        echo "Syntax correct"
+    
+    - name: Detect secrets and passwords
+      run: |
+        echo "Scanning for passwords and sensitive data..."
+        
+        PATTERNS=(
+          "password.*=.*[\"']?[a-zA-Z0-9]{8,}[\"']?"
+          "secret.*=.*[\"']?[a-zA-Z0-9]{8,}[\"']?"
+          "token.*=.*[\"']?[a-zA-Z0-9]{8,}[\"']?"
+          "key.*=.*[\"']?[a-zA-Z0-9]{8,}[\"']?"
+          "POSTGRES_PASSWORD.*=.*[^\{]"
+          "SECRET_KEY.*=.*[^\{]"
+          "CESIUM_TOKEN.*=.*[^\{]"
+          "JWT_ALGORITHM.*=.*[^\{]"
+          "DATABASE_URL.*=.*postgresql://[^@]+@"
+        )
+        
+        FOUND_SECRETS=0
+        
+        for pattern in "${PATTERNS[@]}"; do
+          echo "Searching pattern: $pattern"
+          if grep -r -E "$pattern" . --include="*.yml" --include="*.yaml" --include="*.env" --include="*.json"; then
+            echo "ALERT: Possible exposed password with pattern: $pattern"
+            FOUND_SECRETS=1
+          fi
+        done
+        
+        # Look for real .env files (not .env.example)
+        if find . -name ".env" -not -path "./.git/*" | grep -q ".env"; then
+          echo "CRITICAL ALERT: Real .env file found in repository"
+          find . -name ".env" -not -path "./.git/*"
+          FOUND_SECRETS=1
+        fi
+        
+        # Look for specific hardcoded values
+        if grep -r -E "postgresql://[^:]+:[^@]+@" . --include="*.yml" --include="*.yaml"; then
+          echo "ALERT: Database URL with hardcoded credentials"
+          FOUND_SECRETS=1
+        fi
+        
+        if [ $FOUND_SECRETS -eq 1 ]; then
+          echo "POSSIBLE EXPOSED PASSWORDS FOUND"
+          echo "Please use environment variables instead of hardcoded values"
+          exit 1
+        else
+          echo "No exposed passwords found"
+        fi
+    
+    - name: Check file structure
+      run: |
+        echo "Validating file structure..."
+        
+        # Verify basic structure
+        REQUIRED_DIRS=("backend" "frontend")
+        for dir in "${REQUIRED_DIRS[@]}"; do
+          if [ ! -d "$dir" ]; then
+            echo "Required directory missing: $dir"
+            exit 1
+          fi
+        done
+        
+        # Check if 3dmodels exists if referenced
+        if grep -q "3dmodels" docker-compose.yml && [ ! -d "3dmodels" ]; then
+          echo "Warning: '3dmodels' referenced in docker-compose but directory doesn't exist"
+        fi
+        
+        echo "File structure valid"
+    
+    - name: Dockerfile validation
+      run: |
+        echo "Validating Dockerfiles..."
+        
+        if [ -f "backend/Dockerfile" ]; then
+          echo "Backend Dockerfile found"
+        else
+          echo "Backend Dockerfile not found"
+          exit 1
+        fi
+        
+        if [ -f "frontend/Dockerfile" ]; then
+          echo "Frontend Dockerfile found"
+        else
+          echo "Frontend Dockerfile not found" 
+          exit 1
+        fi
+
+    - name: Final validation
+      run: |
+        echo "Validation completed successfully!"
+        echo "Docker Compose: OK"
+        echo "Security: OK" 
+        echo "File structure: OK"
+        echo "Dockerfiles: OK"

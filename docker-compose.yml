@@ -1,0 +1,75 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: openpedra-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+    networks:
+      - openpedra-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: openpedra-backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      PORT: ${BACKEND_PORT}
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+      CESIUM_TOKEN: ${CESIUM_TOKEN}
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+    ports:
+      - "${BACKEND_PORT}:10000"
+    volumes:
+      - ./backend:/app
+      - ./3dmodels:/app/3dmodels:ro
+    networks:
+      - openpedra-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: openpedra-frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      BACKEND_URL: ${BACKEND_URL}
+      PORT: ${FRONTEND_PORT}
+    ports:
+      - "${FRONTEND_PORT}:8080"
+    volumes:
+      - ./frontend:/app
+      - ./3dmodels:/app/3dmodels:ro
+      - /app/node_modules
+    networks:
+      - openpedra-network
+
+volumes:
+  db_data:
+
+networks:
+  openpedra-network:
+    driver: bridge
+    internal: false  

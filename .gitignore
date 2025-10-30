@@ -1,0 +1,13 @@
+3dmodels/*
+**/.env
+**/*.pyc
+**/__pycache__/
+*.lock
+
+backend/3dmodels
+backend/alembic/versions
+
+frontend/node_modules/
+frontend/3dmodels
+frontend/package-lock.json
+frontend/.package-lock.json

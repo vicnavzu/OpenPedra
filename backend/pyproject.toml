@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "openpedra"
+version = "0.1.0"
+description = ""
+authors = ["Victor Navarro Zurriaga <vicnavzu@gmail.com>"]
+license = "AGPL-3.0"
+packages = [{ include = "app" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.116.0"
+uvicorn = "^0.35.0"
+pydantic = { version = "^2.11.7", extras = ["email"] }
+trimesh = "^4.6.13"
+numpy = "^2.3.1"
+sqlalchemy = "^2.0.41"
+asyncpg = "^0.30.0"
+databases = "^0.9.0"
+geoalchemy2 = "^0.17.1"
+psycopg2-binary = "^2.9.10"
+alembic = "^1.16.3"
+pydantic-settings = "^2.10.1"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+httpx = "^0.28.1"
+typer = "^0.16.1"
+shapely = "^2.1.1"
+greenlet = "^3.1.0"
+gunicorn = "^21.2.0"
+pyproj = "^3.7.2"
+python-jose = {extras = ["cryptography"], version = "^3.5.0"}
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+isort = "^6.0.1"
+
+[build-system]
+requires = ["poetry-main"]
+build-backend = "poetry.main.masonry.api"
+
+[tool.poetry.scripts]
+openpedra = "app.cli:app"
+

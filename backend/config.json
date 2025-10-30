@@ -1,0 +1,5 @@
+{
+    "modelsdir":"/app/3dmodels",
+    "geometriesBuffer": 10,
+    "updateGeometries": true
+}

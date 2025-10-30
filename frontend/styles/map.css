@@ -1,0 +1,120 @@
+/* GENERAL STYLE */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Montserrat', Arial, sans-serif;
+    background: #f0f0f0;
+    color: #333;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* PANELS */
+
+#basemap-control,
+#left-panel {
+    display: flex;
+    flex-direction: column;
+    max-width: 200px;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    gap: 14px;
+    align-items: stretch;
+    z-index: 1000;
+    animation: fadeIn 0.4s ease-out;
+    box-sizing: border-box;
+    
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+#left-panel{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+#basemap-control {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+
+/* BOTÓN COMÚN - ESTILO ÚNICO PARA TODOS */
+
+.common-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    background: linear-gradient(145deg, #dde7c9, #c8d4b5);
+    color: #000000;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.6);
+    text-transform: uppercase;
+    text-decoration: none;
+    gap: 4px;
+    border: 1px solid #6b8e23;
+}
+
+.common-btn:hover {
+    background: linear-gradient(145deg, #81bd87, #73aa78);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+
+/* LISTA DE BOTONES */
+
+.child-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* ANIMACION */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
