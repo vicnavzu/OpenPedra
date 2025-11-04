@@ -10,6 +10,7 @@ from app.settings.config import settings
 import logging
 from app.services.sync import update
 from app.services.utils import slugify
+from app.services.initial_admin import create_initial_admin
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.school import School
@@ -19,7 +20,8 @@ import json
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
@@ -60,6 +62,11 @@ async def startup():
     else:
         logger.info("Skipping geometry update due to config.json settings.")
 
+    try:
+        await create_initial_admin()
+    except Exception as e:
+        logger.error(f"Could not create initial admin: {e}")
+
 @app.on_event("shutdown")
 async def shutdown():
     logger.info("Application shutting down...")
@@ -71,6 +78,7 @@ app.include_router(api_openpedra.sector_router, prefix=router_prefix, tags=["Sec
 app.include_router(api_openpedra.block_router, prefix=router_prefix, tags=["Blocks"])
 app.include_router(api_openpedra.problem_router, prefix=router_prefix, tags=["Problems"])
 app.include_router(api_openpedra.user_router, prefix=router_prefix, tags=["Users"])
+app.include_router(api_openpedra.invitation_router, prefix=router_prefix, tags=["Invitations"])
 
 @app.get("/")
 async def root():
