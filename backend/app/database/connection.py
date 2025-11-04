@@ -7,6 +7,8 @@ from app.models.school import School
 from app.models.sector import Sector
 from app.models.block import Block
 from app.models.problem import Problem
+from app.models.user import User
+from app.models.invitation import Invitation
 
 logging.basicConfig()
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
