@@ -9,6 +9,9 @@ from app.models.problem import Problem
 from app.models.block import Block
 from app.models.sector import Sector
 from app.models.school import School
+from app.models.user import User
+
+from app.services.auth import get_current_user
 from app.database.connection import get_db
 
 import logging
@@ -121,7 +124,8 @@ async def create_problem(
     sector: str,
     block: str,
     problem_data: dict,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user) 
 ):
     """
     Create a new problem in a specific block of a school and sector.
@@ -195,7 +199,14 @@ async def create_problem(
     }
 
 @router.delete("/problem/{problem_id}", status_code=200)
-async def delete_problem(problem_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_problem(
+    problem_id: str, 
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user) 
+):
+    """
+    Delete a specific problem.
+    """
     result = await db.execute(select(Problem).where(Problem.id == problem_id))
     problem = result.scalars().first()
 
@@ -206,7 +217,11 @@ async def delete_problem(problem_id: str, db: AsyncSession = Depends(get_db)):
     await db.commit()
 
 @router.put("/problem/{problem_id}", status_code=200)
-async def update_problem(problem_id: str, problem_data: dict, db: AsyncSession = Depends(get_db)):
+async def update_problem(
+    problem_id: str, 
+    problem_data: dict, 
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user) ):
     """
     Actualiza un problema existente.
     """
