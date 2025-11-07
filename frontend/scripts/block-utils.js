@@ -846,6 +846,7 @@ export function showLoginForm(container, onSuccess) {
   if (oldForm) oldForm.remove();
 
   const form = document.createElement("div");
+  form.id = "login-form";
 
   form.innerHTML = `
     <h4>Iniciar sesión</h4>
@@ -857,9 +858,14 @@ export function showLoginForm(container, onSuccess) {
 
   container.appendChild(form);
 
-  form.querySelector("#login-submit").addEventListener("click", async () => {
-    const username = form.querySelector("#login-username").value.trim();
-    const password = form.querySelector("#login-password").value.trim();
+  const usernameInput = form.querySelector("#login-username");
+  const passwordInput = form.querySelector("#login-password");
+  const submitBtn = form.querySelector("#login-submit");
+  const cancelBtn = form.querySelector("#login-cancel");
+
+  async function handleLogin() {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
 
     if (!username || !password) {
       alert("Por favor ingresa usuario y contraseña");
@@ -880,18 +886,41 @@ export function showLoginForm(container, onSuccess) {
 
       const data = await res.json();
       localStorage.setItem("token", data.auth_token);
-
       form.remove();
-      alert("Sesión iniciada correctamente ");
+      alert("Sesión iniciada correctamente");
       onSuccess();
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
       alert("Error al iniciar sesión");
     }
+  }
+
+  submitBtn.addEventListener("click", handleLogin);
+
+  form.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleLogin();
+    }
   });
 
-  form.querySelector("#login-cancel").addEventListener("click", () => {
+  cancelBtn.addEventListener("click", () => {
     form.remove();
   });
-  
+}
+
+export function addLogoutButton(leftPanel) {
+  if (document.getElementById("logout-btn")) return;
+
+  const logoutBtn = document.createElement("button");
+  logoutBtn.id = "logout-btn";
+  logoutBtn.textContent = "Cerrar sesión";
+
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("token");
+    alert("Sesión cerrada correctamente");
+    location.reload();
+  });
+
+  leftPanel.appendChild(logoutBtn);
 }

@@ -23,6 +23,7 @@ import {
   setupLineDrawing,
   checkIfLoggedIn,
   showLoginForm,
+  addLogoutButton,
 } from './block-utils.js';
 
 let tileset;
@@ -194,6 +195,8 @@ const editToggleBtn = createButton(leftPanel, 'Activar edición', 'edit-btn', as
   if (!loggedIn) {
     showLoginForm(leftPanel, () => editToggleBtn.click());
     return;
+  } else {
+    addLogoutButton(leftPanel);
   }
 
   editModeActive = !editModeActive;
