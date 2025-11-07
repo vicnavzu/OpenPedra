@@ -19,7 +19,7 @@ jobs:
         fi
         
         echo "Validating docker-compose syntax..."
-        docker-compose config -q
+        docker compose config -q
         echo "Syntax correct"
     
     - name: Detect secrets and passwords
