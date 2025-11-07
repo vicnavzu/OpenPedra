@@ -58,6 +58,14 @@ async def register_user(
     
     return new_user
 
+@router.post("/login")
+async def login(user: UserLogin, db: AsyncSession = Depends(get_db)):
+    db_user = await db.scalar(select(User).where(User.username == user.username))
+    if not db_user or not verify_password(user.password, db_user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    auth_token = create_auth_token({"sub": db_user.username})
+    return {"auth_token": auth_token, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserRead)
 async def get_current_user_profile(
