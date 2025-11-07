@@ -821,3 +821,106 @@ export function setupLineDrawing(viewer, tileset, school, sector, block, linesDa
 
     return startLineDrawing;
 }
+
+
+// === Verificar si el usuario está logueado ===
+export async function checkIfLoggedIn() {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/v1/users/me`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${localStorage.getItem("token") || ""}`
+      }
+    });
+    return response.ok; // true si status 200
+  } catch (error) {
+    console.error("Error checking login:", error);
+    return false;
+  }
+}
+
+// === Formulario de login ===
+export function showLoginForm(container, onSuccess) {
+
+  const oldForm = document.getElementById("login-form");
+  if (oldForm) oldForm.remove();
+
+  const form = document.createElement("div");
+  form.id = "login-form";
+
+  form.innerHTML = `
+    <h4>Iniciar sesión</h4>
+    <input id="login-username" placeholder="Usuario" style="display:block;margin-bottom:5px;width:100%;">
+    <input id="login-password" type="password" placeholder="Contraseña" style="display:block;margin-bottom:5px;width:100%;">
+    <button id="login-submit" style="margin-right:5px;">Entrar</button>
+    <button id="login-cancel">Cancelar</button>
+  `;
+
+  container.appendChild(form);
+
+  const usernameInput = form.querySelector("#login-username");
+  const passwordInput = form.querySelector("#login-password");
+  const submitBtn = form.querySelector("#login-submit");
+  const cancelBtn = form.querySelector("#login-cancel");
+
+  async function handleLogin() {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!username || !password) {
+      alert("Por favor ingresa usuario y contraseña");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/v1/users/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!res.ok) {
+        alert("Credenciales inválidas");
+        return;
+      }
+
+      const data = await res.json();
+      localStorage.setItem("token", data.auth_token);
+      form.remove();
+      alert("Sesión iniciada correctamente");
+      onSuccess();
+    } catch (err) {
+      console.error("Error al iniciar sesión:", err);
+      alert("Error al iniciar sesión");
+    }
+  }
+
+  submitBtn.addEventListener("click", handleLogin);
+
+  form.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleLogin();
+    }
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    form.remove();
+  });
+}
+
+export function addLogoutButton(leftPanel) {
+  if (document.getElementById("logout-btn")) return;
+
+  const logoutBtn = document.createElement("button");
+  logoutBtn.id = "logout-btn";
+  logoutBtn.textContent = "Cerrar sesión";
+
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("token");
+    alert("Sesión cerrada correctamente");
+    location.reload();
+  });
+
+  leftPanel.appendChild(logoutBtn);
+}

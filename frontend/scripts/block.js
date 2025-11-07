@@ -21,6 +21,9 @@ import {
   updatePopupPosition,
   resetEntity,
   setupLineDrawing,
+  checkIfLoggedIn,
+  showLoginForm,
+  addLogoutButton,
 } from './block-utils.js';
 
 let tileset;
@@ -184,81 +187,91 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Botón edición
-  const editToggleBtn = createButton(leftPanel, 'Activar edición', 'edit-btn', async () => {
-    editModeActive = !editModeActive;
-    toggleEditMode(
-      viewer, 
-      editModeActive, 
-      isDrawing,
-      activeLine, 
-      floatingPoint,
-      activeLinePoints,
-      pendingLineAttrs,
-      selectedEntity, 
-      popupElement, 
-      popupTrackedEntity
-    );
+// === Botón edición ===
+const editToggleBtn = createButton(leftPanel, 'Activar edición', 'edit-btn', async () => {
+  const loggedIn = await checkIfLoggedIn();
 
-    if (editModeActive) {
-      editToggleBtn.textContent = "Desactivar edición";
+  // Si no está logueado, mostrar formulario y salir
+  if (!loggedIn) {
+    showLoginForm(leftPanel, () => editToggleBtn.click());
+    return;
+  } else {
+    addLogoutButton(leftPanel);
+  }
 
-      const exportBtn = createButton(leftPanel, 'Exportar JSON', 'export-btn', () => {
-        updateLinesData(viewer, linesData);
-        const blob = new Blob([JSON.stringify(linesData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'lineas_actualizadas.json';
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-      editButtons.push(exportBtn);
+  editModeActive = !editModeActive;
+  toggleEditMode(
+    viewer, 
+    editModeActive, 
+    isDrawing,
+    activeLine, 
+    floatingPoint,
+    activeLinePoints,
+    pendingLineAttrs,
+    selectedEntity, 
+    popupElement, 
+    popupTrackedEntity
+  );
 
-      const drawBtn = createButton(leftPanel, 'Dibujar línea', 'draw-btn', () => {
-        isDrawing = true;
-        
-        const drawingState = {
-            get isDrawing() { return isDrawing; },
-            set isDrawing(value) { isDrawing = value; },
-            get activeLinePoints() { return activeLinePoints; },
-            set activeLinePoints(value) { activeLinePoints = value; },
-            get activeLine() { return activeLine; },
-            set activeLine(value) { activeLine = value; },
-            get floatingPoint() { return floatingPoint; },
-            set floatingPoint(value) { floatingPoint = value; },
-            get pendingLineAttrs() { return pendingLineAttrs; },
-            set pendingLineAttrs(value) { pendingLineAttrs = value; }
-        };
-        
-        const startDrawing = setupLineDrawing(viewer, tileset, school, sector, block, linesData, drawingState);
-        window.drawingHandlers = startDrawing();
-      });
+  if (editModeActive) {
+    editToggleBtn.textContent = "Desactivar edición";
 
-      editButtons.push(drawBtn);
+    const exportBtn = createButton(leftPanel, 'Exportar JSON', 'export-btn', () => {
+      updateLinesData(viewer, linesData);
+      const blob = new Blob([JSON.stringify(linesData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lineas_actualizadas.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+    editButtons.push(exportBtn);
 
-      enableVertexEditing(viewer);
+    const drawBtn = createButton(leftPanel, 'Dibujar línea', 'draw-btn', () => {
+      isDrawing = true;
 
-    } else {
-      editToggleBtn.textContent = "Activar edición";
+      const drawingState = {
+        get isDrawing() { return isDrawing; },
+        set isDrawing(value) { isDrawing = value; },
+        get activeLinePoints() { return activeLinePoints; },
+        set activeLinePoints(value) { activeLinePoints = value; },
+        get activeLine() { return activeLine; },
+        set activeLine(value) { activeLine = value; },
+        get floatingPoint() { return floatingPoint; },
+        set floatingPoint(value) { floatingPoint = value; },
+        get pendingLineAttrs() { return pendingLineAttrs; },
+        set pendingLineAttrs(value) { pendingLineAttrs = value; }
+      };
 
-      // === Eliminar botones previos ===
-      for (const btn of editButtons) {
-        if (btn && btn.remove) btn.remove();
-      }
-      editButtons.length = 0; // Limpieza segura
+      const startDrawing = setupLineDrawing(viewer, tileset, school, sector, block, linesData, drawingState);
+      window.drawingHandlers = startDrawing();
+    });
 
-      // Limpiar cualquier dibujo en curso
-      if (activeLine) viewer.entities.remove(activeLine);
-      if (floatingPoint) viewer.entities.remove(floatingPoint);
-      activeLinePoints = [];
-      isDrawing = false;
-      pendingLineAttrs = null;
+    editButtons.push(drawBtn);
 
-      clearSelection(viewer, selectedEntity, popupElement, popupTrackedEntity);
-      console.log("Modo edición desactivado y botones eliminados");
+    enableVertexEditing(viewer);
+
+  } else {
+    editToggleBtn.textContent = "Activar edición";
+
+    // === Eliminar botones previos ===
+    for (const btn of editButtons) {
+      if (btn && btn.remove) btn.remove();
     }
-  });
+    editButtons.length = 0; // Limpieza segura
+
+    // Limpiar cualquier dibujo en curso
+    if (activeLine) viewer.entities.remove(activeLine);
+    if (floatingPoint) viewer.entities.remove(floatingPoint);
+    activeLinePoints = [];
+    isDrawing = false;
+    pendingLineAttrs = null;
+
+    clearSelection(viewer, selectedEntity, popupElement, popupTrackedEntity);
+    console.log("Modo edición desactivado y botones eliminados");
+  }
+});
 
   // === HANDLER UNIFICADO ===
   const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);

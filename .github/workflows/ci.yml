@@ -42,8 +42,19 @@ jobs:
         
         for pattern in "${PATTERNS[@]}"; do
           echo "Searching pattern: $pattern"
-          if grep -r -E "$pattern" . --include="*.yml" --include="*.yaml" --include="*.env" --include="*.json"; then
+
+          MATCHES=$(grep -r -E "$pattern" . \
+            --include="*.yml" \
+            --include="*.yaml" \
+            --include="*.env" \
+            --include="*.json" \
+            | grep -v "\${[A-Za-z0-9_]\+}" \
+            | grep -v "\${{ *secrets\." \
+            || true)
+
+          if [[ -n "$MATCHES" ]]; then
             echo "ALERT: Possible exposed password with pattern: $pattern"
+            echo "$MATCHES"
             FOUND_SECRETS=1
           fi
         done
