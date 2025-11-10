@@ -4,6 +4,7 @@ from app.api.v1.block import router as block_router
 from app.api.v1.problem import router as problem_router
 from app.api.v1.user import router as user_router
 from app.api.v1.invitation import router as invitation_router
+from app.api.v1.permission import router as permission_router
 
 __all__ = [
     "school_router", 
@@ -11,5 +12,6 @@ __all__ = [
     "block_router", 
     "problem_router",
     "user_router",
-    "invitation_router"
+    "invitation_router",
+    "permission_router"
     ]
