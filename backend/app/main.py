@@ -79,6 +79,7 @@ app.include_router(api_openpedra.block_router, prefix=router_prefix, tags=["Bloc
 app.include_router(api_openpedra.problem_router, prefix=router_prefix, tags=["Problems"])
 app.include_router(api_openpedra.user_router, prefix=router_prefix, tags=["Users"])
 app.include_router(api_openpedra.invitation_router, prefix=router_prefix, tags=["Invitations"])
+app.include_router(api_openpedra.permission_router, prefix=router_prefix, tags=["Permissions"])
 
 @app.get("/")
 async def root():
