@@ -1,0 +1,112 @@
+
+    :root {
+      --panel-bg: #73aa78;
+      --muted: #666;
+      --card: #dde7c9;
+      --accent: #2c5530;
+      --danger: #c84a4a;
+    }
+    body {
+      margin: 0;
+      font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: #f5f7f6;
+      color: #222;
+    }
+
+    /* Main left panel like your existing UI */
+    #left-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 320px;
+      padding: 16px;
+      box-sizing: border-box;
+      background: var(--panel-bg);
+      color: white;
+      overflow-y: auto;
+      z-index: 1100;
+    }
+
+    #left-panel h2 { margin: 0 0 8px 0; color: var(--accent); }
+    #left-panel p { margin: 6px 0; color: #123; }
+
+    /* Main content area */
+    main {
+      margin-left: 340px;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .list {
+      max-height: 60vh;
+      overflow: auto;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #e6e6e6;
+    }
+
+    .user-item, .entity-item, .perm-item {
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      background: #fafafa;
+      border: 1px solid transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .user-item:hover, .entity-item:hover { border-color: #ddd; }
+    .user-item.selected, .entity-item.selected { background: linear-gradient(90deg,#e9f6ea,#f6fff6); border-color: var(--accent); }
+
+    .controls {
+      display:flex;
+      gap:8px;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-ghost { background: transparent; border: 1px solid #ccc; color: #333; }
+
+    .small { font-size: 13px; padding: 6px 8px; }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    /* bottom fixed logout inside left panel (keeps same style as you wanted) */
+    #logout-btn {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      background: linear-gradient(145deg,#c84a4a,#a33d3d);
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      text-transform: uppercase;
+    }

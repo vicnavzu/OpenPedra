@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Panel de administracion</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v7.4.0/ol.css">
+  <link href="/styles/admin-panel.css" rel="stylesheet" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+  <aside id="left-panel">
+    <h2>Admin - Permisos</h2>
+    <p class="muted">Panel de administración: asignar/quitar permisos de edición sobre escuelas, sectores y bloques.</p>
+
+    <div id="admin-status" class="card small muted">Comprobando permisos...</div>
+
+    <div class="card">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="filter-users" placeholder="Filtrar usuarios..." style="flex:1;padding:6px;border-radius:6px;border:1px solid #d6d6d6;">
+        <button id="btn-refresh-users" class="small btn-ghost">Actualizar</button>
+      </div>
+      <div id="users-list" class="list" style="margin-top:8px;">Cargando usuarios...</div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="filter-entities" placeholder="Filtrar entidades..." style="flex:1;padding:6px;border-radius:6px;border:1px solid #d6d6d6;">
+        <button id="btn-refresh-entities" class="small btn-ghost">Actualizar</button>
+      </div>
+      <div id="entities-tree" class="list" style="margin-top:8px;">Cargando entidades...</div>
+    </div>
+
+    <button id="logout-btn">Cerrar sesión</button>
+  </aside>
+
+  <main>
+    <div class="card">
+      <strong>Usuario seleccionado:</strong>
+      <div id="selected-user" class="muted">— ninguno —</div>
+      <strong style="margin-top:8px;display:block">Entidad seleccionada:</strong>
+      <div id="selected-entity" class="muted">— ninguna —</div>
+
+      <div class="controls">
+        <button id="btn-grant" class="btn-primary small">Asignar permiso</button>
+        <button id="btn-revoke" class="btn-danger small">Quitar permiso</button>
+        <button id="btn-refresh-perms" class="small btn-ghost">Actualizar permisos</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Permisos actuales</h3>
+      <div id="permissions-list" class="list">Cargando permisos...</div>
+    </div>
+  </main>
+
+<script src="/scripts/admin-panel.js"></script>
+
+</body>
+</html>

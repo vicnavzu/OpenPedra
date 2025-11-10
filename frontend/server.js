@@ -118,6 +118,26 @@ app.get('/', (req, res) => {
     });
 });
 
+// Ruta para servir el panel de administración
+app.get('/admin', (req, res) => {
+    const htmlPath = path.join(__dirname, 'public', 'admin-panel.html');
+    fs.readFile(htmlPath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading admin HTML file:', err);
+            return res.status(500).send('Error loading admin panel');
+        }
+
+        const modifiedHtml = data.replace(
+            '</head>',
+            `<script>
+                window.BACKEND_URL = "${process.env.BACKEND_URL}";
+            </script></head>`
+        );
+
+        res.send(modifiedHtml);
+    });
+});
+
 // Ruta de healthcheck
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'frontend' });
