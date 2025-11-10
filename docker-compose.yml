@@ -38,6 +38,7 @@ services:
       CESIUM_TOKEN: ${CESIUM_TOKEN}
       SECRET_KEY: ${SECRET_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
+      RELOAD: "true"
     ports:
       - "${BACKEND_PORT}:10000"
     volumes:
