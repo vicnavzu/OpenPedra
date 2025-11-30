@@ -47,7 +47,6 @@ export function createViewer(containerId) {
   viewer.scene.shadowMap.darkness = 0.6;
   viewer.scene.shadowMap.maximumDistance = 1000.0;
 
-  // Inicializar luz solar
   viewer.scene.light = new Cesium.SunLight();
 
   if (!viewer.scene.pickPositionSupported) {
@@ -69,30 +68,89 @@ export const createButton = (panel, text, className, onClick) => {
 /**
  * Carga un 3D Tileset
  */
-export async function loadTileset(viewer, school, sector, block) {
-  if (!modelsdir) throw new Error('Config no cargada. Llama a loadConfig() primero.');
+
+function calculateDifference(tilesetJson) {
+
+  const boundingVolume = tilesetJson.root.boundingVolume.box;
+  
+  const center = {
+    x: boundingVolume[0],
+    y: boundingVolume[1],
+    z: boundingVolume[2]
+  };
+
+  const lowestVertexX = boundingVolume[0] - (boundingVolume[3] / 2); // x - half extent x
+  const lowestVertexY = boundingVolume[1] - (boundingVolume[8] / 2); // y - half extent y  
+  const lowestVertexZ = boundingVolume[2] - (boundingVolume[11] / 2); // z - half height
+
+  const difference = {
+    x: center.x - lowestVertexX,
+    y: center.y - lowestVertexY,
+    z: center.z - lowestVertexZ
+  };
+
+  return difference;
+}
+
+export async function loadTileset(viewer, school, sector, block, autoHeight=false) {
+  if (!modelsdir) throw new Error('No config loaded. Calling loadConfig() first.');
   const url = `${modelsdir}/${school}/${sector}/${block}/tileset.json`;
 
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+    const tilesetJson = await response.json();
+
   try {
-    const tileset = await Cesium.Cesium3DTileset.fromUrl(url);
+    const tileset = await Cesium.Cesium3DTileset.fromUrl(url,{
+      backFaceCulling: false,
+    });
+    
+    const originalBoundingSphere = tileset.boundingSphere;
+    const centerCartesian = originalBoundingSphere.center;
+    
+    if (autoHeight) {
+      const difference = calculateDifference(tilesetJson);
+      console.log('Difference between center and min vertex:', difference.z);
+
+      const carto = Cesium.Cartographic.fromCartesian(centerCartesian);
+
+      const lat = Cesium.Math.toDegrees(carto.latitude);
+      const lon = Cesium.Math.toDegrees(carto.longitude);
+      
+      const terrainProvider = await Cesium.createWorldTerrainAsync();
+      const updatedPositions = await Cesium.sampleTerrainMostDetailed(
+        terrainProvider,
+        [Cesium.Cartographic.fromDegrees(lon, lat)]
+      );
+
+      const terrainHeight = updatedPositions[0].height;
+      
+      carto.height = terrainHeight + difference.z
+      console.log("Terrain height:", terrainHeight);
+
+      console.log("Final height:", carto.height);      
+      const newCenter = Cesium.Cartographic.toCartesian(carto);
+      const offset = Cesium.Cartesian3.subtract(newCenter, centerCartesian, new Cesium.Cartesian3());
+      
+      tileset.modelMatrix = Cesium.Matrix4.fromTranslation(offset);
+    }
+
     viewer.scene.primitives.add(tileset);
     viewer._mainTileset = tileset;
 
-    // Zoom inicial
     try {
       await viewer.zoomTo(tileset, new Cesium.HeadingPitchRange(0, -1.57, 0));
     } catch (e) {
-      console.warn('Zoom al tileset falló, continuando sin bloquear:', e);
+      console.warn("Tileset zoom fails:", e);
     }
 
-    console.log(`Tileset cargado correctamente: ${url}`);
     return tileset;
+
   } catch (error) {
-    console.warn(`No se pudo cargar el tileset 3D: ${url}`, error);
+    console.warn(`Error loading 3DTileset: ${url}`, error);
     return null;
   }
 }
-
 
 /**
  * Carga líneas desde la API de problemas del backend
@@ -150,6 +208,7 @@ export async function loadLinesFromDb(viewer, school, sector, block) {
             type: 'line',
             originalColor: lineColor
           }
+          
         });
         lineEntities.push(entity);
       } catch (e) {
